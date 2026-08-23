@@ -32,10 +32,18 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
 });
 
+/* commands */
+
 const commands = [
   new SlashCommandBuilder()
     .setName("ticket-panel")
     .setDescription("Post the Greenland support ticket panel.")
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .toJSON(),
+
+  new SlashCommandBuilder()
+    .setName("test-boost")
+    .setDescription("Preview the Greenland boost message.")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .toJSON(),
 ];
@@ -57,6 +65,22 @@ async function registerCommands() {
   console.log("Slash commands registered.");
 }
 
+/* boost embed editor */
+
+function buildBoostEmbed(member) {
+  return new EmbedBuilder()
+    .setColor("#9b59b6")
+    .setTitle(
+      "<a:boost:1541194194322989157> Greenland has been strengthened! <a:boost:1541194194322989157>",
+    )
+    .setDescription(
+      `Thank you ${member} for boosting **${member.guild.name}**!`,
+    )
+    .setThumbnail(member.user.displayAvatarURL())
+    .setFooter({ text: "Greenland PH • Thank you for your support" })
+    .setTimestamp();
+}
+
 client.once(Events.ClientReady, async (readyClient) => {
   console.log(`Logged in as ${readyClient.user.tag}`);
   await registerCommands();
@@ -66,41 +90,69 @@ client.on(Events.GuildMemberAdd, async (member) => {
   const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
   if (!channel?.isTextBased()) return;
 
+  /* welcome embed editor here */
+
   const embed = new EmbedBuilder()
-    .setColor(0x7ebc4c)
-    .setTitle("Welcome to Greenland PH")
+    .setColor("#92c553")
+    .setTitle("Welcome to Greenland PH!")
     .setDescription(
-      `Welcome ${member} to **Greenland PH**.\nPlease read the rules and enjoy your stay.`,
+      [
+        `Hey ${member}, <a:dinosaur:1541189583461421167> welcome to **Greenland PH**! <a:25536clover:1541197359675871242>`,
+        "",
+        "Here’s where to begin:",
+        "",
+        "<:205667glowingdotwhite:1539608766243143700> Read the server rules in <#1539389490454601768>",
+        "<:205667glowingdotwhite:1539608766243143700> Read Greenland's isle info & rules in <#1539401563502678078>",
+        "<:205667glowingdotwhite:1539608766243143700> Need help? Open a ticket in <#1539469830913003540>",
+        "",
+        "Enjoy your stay! <a:dinosaursjump:1541189521566208070>",
+      ].join("\n"),
     )
     .setThumbnail(member.user.displayAvatarURL())
+    .setFooter({ text: "Greenland PH • The Isle" })
     .setTimestamp();
 
   await channel.send({ embeds: [embed] });
 });
 
 client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
-  const justBoosted =
-    !oldMember.premiumSinceTimestamp && newMember.premiumSinceTimestamp;
+  function buildBoostEmbed(member) {
+    return new EmbedBuilder()
+      .setColor("#E6A84A")
+      .setTitle("✨ A new Greenland boost")
+      .setDescription(
+        `Thank you ${member} for boosting **${member.guild.name}**!`,
+      )
+      .setThumbnail(member.user.displayAvatarURL())
+      .setFooter({ text: "Greenland PH • Thank you for your support" })
+      .setTimestamp();
+  }
 
-  if (!justBoosted) return;
+  client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
+    const justBoosted =
+      !oldMember.premiumSinceTimestamp && newMember.premiumSinceTimestamp;
 
-  const channel = newMember.guild.channels.cache.get(BOOST_CHANNEL_ID);
-  if (!channel?.isTextBased()) return;
+    if (!justBoosted) return;
 
-  const embed = new EmbedBuilder()
-    .setColor(0xe6a84a)
-    .setTitle("New server boost")
-    .setDescription(
-      `Thank you ${newMember} for boosting **${newMember.guild.name}**! ✨`,
-    )
-    .setThumbnail(newMember.user.displayAvatarURL())
-    .setTimestamp();
+    const channel = newMember.guild.channels.cache.get(BOOST_CHANNEL_ID);
+    if (!channel?.isTextBased()) return;
 
-  await channel.send({ embeds: [embed] });
+    await channel.send({
+      embeds: [buildBoostEmbed(newMember)],
+    });
+  });
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
   try {
+    if (
+      interaction.isChatInputCommand() &&
+      interaction.commandName === "test-boost"
+    ) {
+      return interaction.reply({
+        embeds: [buildBoostEmbed(interaction.member)],
+      });
+    }
     if (
       interaction.isChatInputCommand() &&
       interaction.commandName === "ticket-panel"
@@ -112,7 +164,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         .setStyle(ButtonStyle.Success);
 
       const embed = new EmbedBuilder()
-        .setColor(0x7ebc4c)
+        .setColor("#92c553")
         .setTitle("Greenland PH Support")
         .setDescription(
           "Need help? Press the button below to open a private support ticket.",
@@ -193,6 +245,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
               PermissionFlagsBits.ViewChannel,
               PermissionFlagsBits.SendMessages,
               PermissionFlagsBits.ReadMessageHistory,
+            ],
+          },
+          {
+            id: interaction.client.user.id,
+            allow: [
+              PermissionFlagsBits.ViewChannel,
+              PermissionFlagsBits.SendMessages,
+              PermissionFlagsBits.ReadMessageHistory,
+              PermissionFlagsBits.EmbedLinks,
             ],
           },
           {
