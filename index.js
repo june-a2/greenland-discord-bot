@@ -167,9 +167,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
         .setColor("#92c553")
         .setTitle("Greenland PH Support")
         .setDescription(
-          "Need help? Press the button below to open a private support ticket.",
+          "Need a hand? Open a private ticket and tell us what you need help with.\n\nInclude as much relevant detail as you can so our staff can help you faster.",
         )
-        .setFooter({ text: "One ticket per issue." });
+        .setFooter({ text: "Please create one ticket per issue." });
 
       await interaction.channel.send({
         embeds: [embed],
@@ -196,7 +196,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       const details = new TextInputBuilder()
         .setCustomId("details")
-        .setLabel("Describe your issue")
+        .setLabel("Tell us more")
+        .setPlaceholder(
+          "Tell us what you need help with and include any useful details.",
+        )
         .setStyle(TextInputStyle.Paragraph)
         .setRequired(true)
         .setMaxLength(1000);
@@ -274,7 +277,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         .setStyle(ButtonStyle.Danger);
 
       const embed = new EmbedBuilder()
-        .setColor(0x7ebc4c)
+        .setColor("#ee5959")
         .setTitle("Support ticket")
         .addFields(
           { name: "Member", value: `${interaction.user}`, inline: true },
