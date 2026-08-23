@@ -26,6 +26,7 @@ const {
   BOOST_CHANNEL_ID,
   TICKET_CATEGORY_ID,
   SUPPORT_ROLE_ID,
+  VERIFIED_ROLE_ID,
 } = process.env;
 
 const client = new Client({
@@ -35,6 +36,12 @@ const client = new Client({
 /* commands */
 
 const commands = [
+  new SlashCommandBuilder()
+    .setName("verify-panel")
+    .setDescription("Post the Greenland verification panel.")
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .toJSON(),
+
   new SlashCommandBuilder()
     .setName("ticket-panel")
     .setDescription("Post the Greenland support ticket panel.")
@@ -145,6 +152,64 @@ client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
 
 client.on(Events.InteractionCreate, async (interaction) => {
   try {
+    if (
+      interaction.isChatInputCommand() &&
+      interaction.commandName === "verify-panel"
+    ) {
+      const verifyButton = new ButtonBuilder()
+        .setCustomId("verify-complete")
+        .setLabel("Verify")
+        .setEmoji("✅")
+        .setStyle(ButtonStyle.Success);
+
+      const embed = new EmbedBuilder()
+        .setColor("#7EBC4C")
+        .setTitle("Welcome to Greenland PH")
+        .setDescription(
+          [
+            "Greenland PH is a new community, and we want to keep it a safe and welcoming place for everyone.",
+            "",
+            "<:205667glowingdotwhite:1539608766243143700> Please take a moment to verify your account before entering the server.",
+            "",
+            "<:205667glowingdotwhite:1539608766243143700> Click **Verify** below to unlock access.",
+          ].join("\n"),
+        )
+        .setFooter({ text: "Greenland PH • Community verification" });
+
+      await interaction.channel.send({
+        embeds: [embed],
+        components: [new ActionRowBuilder().addComponents(verifyButton)],
+      });
+
+      return interaction.reply({
+        content: "Verification panel posted.",
+        ephemeral: true,
+      });
+    }
+    if (interaction.isButton() && interaction.customId === "verify-complete") {
+      const role = interaction.guild.roles.cache.get(VERIFIED_ROLE_ID);
+
+      if (!role) {
+        return interaction.reply({
+          content: "Verification is not configured correctly yet.",
+          ephemeral: true,
+        });
+      }
+
+      if (interaction.member.roles.cache.has(VERIFIED_ROLE_ID)) {
+        return interaction.reply({
+          content: "You are already verified.",
+          ephemeral: true,
+        });
+      }
+
+      await interaction.member.roles.add(role);
+
+      return interaction.reply({
+        content: "You are verified. Welcome to Greenland PH! 🌿",
+        ephemeral: true,
+      });
+    }
     if (
       interaction.isChatInputCommand() &&
       interaction.commandName === "test-boost"
