@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const {
   ActionRowBuilder,
+  ActivityType,
   ButtonBuilder,
   ButtonStyle,
   ChannelType,
@@ -91,6 +92,16 @@ function buildBoostEmbed(member) {
 client.once(Events.ClientReady, async (readyClient) => {
   console.log(`Logged in as ${readyClient.user.tag}`);
   await registerCommands();
+});
+
+client.user.setPresence({
+  activities: [
+    {
+      name: "Greenland PH",
+      type: ActivityType.Playing,
+    },
+  ],
+  status: "online",
 });
 
 client.on(Events.GuildMemberAdd, async (member) => {
