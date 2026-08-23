@@ -90,18 +90,18 @@ function buildBoostEmbed(member) {
 }
 
 client.once(Events.ClientReady, async (readyClient) => {
+  readyClient.user.setPresence({
+    activities: [
+      {
+        name: "Greenland PH",
+        type: ActivityType.Playing,
+      },
+    ],
+    status: "online",
+  });
+
   console.log(`Logged in as ${readyClient.user.tag}`);
   await registerCommands();
-});
-
-client.user.setPresence({
-  activities: [
-    {
-      name: "Greenland PH",
-      type: ActivityType.Playing,
-    },
-  ],
-  status: "online",
 });
 
 client.on(Events.GuildMemberAdd, async (member) => {
@@ -194,7 +194,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       return interaction.reply({
         content: "Verification panel posted.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
     if (interaction.isButton() && interaction.customId === "verify-complete") {
@@ -203,14 +203,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
       if (!role) {
         return interaction.reply({
           content: "Verification is not configured correctly yet.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
       if (interaction.member.roles.cache.has(VERIFIED_ROLE_ID)) {
         return interaction.reply({
           content: "You are already verified.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -218,7 +218,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       return interaction.reply({
         content: "You are verified. Welcome to Greenland PH! 🌿",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
     if (
@@ -254,7 +254,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       return interaction.reply({
         content: "Ticket panel posted.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -299,7 +299,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       if (existingTicket) {
         return interaction.reply({
           content: `You already have an open ticket: ${existingTicket}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -370,7 +370,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       return interaction.reply({
         content: `Your ticket is ready: ${ticketChannel}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -381,7 +381,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       if (!isOwner && !isSupport(interaction.member)) {
         return interaction.reply({
           content: "Only the ticket owner or staff can close this ticket.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -397,7 +397,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.replied && !interaction.deferred) {
       await interaction.reply({
         content: "Something went wrong. Please try again.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   }
