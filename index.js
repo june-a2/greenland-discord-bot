@@ -10,6 +10,7 @@ const {
   EmbedBuilder,
   Events,
   GatewayIntentBits,
+  MessageFlags,
   ModalBuilder,
   PermissionFlagsBits,
   REST,
